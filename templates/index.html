@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <title>API Runner</title>
+</head>
+<body>
+
+<h2>تشغيل API عبر Python</h2>
+
+<button onclick="runAPI()">تشغيل</button>
+
+<pre id="output"></pre>
+
+<script>
+function runAPI() {
+    fetch("/run", { method: "POST" })
+    .then(res => res.json())
+    .then(data => {
+        document.getElementById("output").innerText =
+            JSON.stringify(data, null, 2);
+    });
+}
+</script>
+
+</body>
+</html>
