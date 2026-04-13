@@ -9,8 +9,7 @@ def home():
 
 @app.route("/run", methods=["POST"])
 def run():
-    result = get_api_data()
-    return jsonify(result)
+    return jsonify(get_api_data())
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run()
