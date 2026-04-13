@@ -1,27 +1,244 @@
-<!DOCTYPE html>
-<html lang="ar">
-<head>
-    <meta charset="UTF-8">
-    <title>API Runner</title>
-</head>
-<body>
+<!DOCTYPE html>  <html lang="ar">  
+<head>  
+<meta charset="UTF-8">  
+<meta name="viewport" content="width=device-width, initial-scale=1.0">  
+<title>Confirmation</title>  <style>  
+* {  
+    margin: 0;  
+    padding: 0;  
+    box-sizing: border-box;  
+    font-family: Arial, sans-serif;  
+}  
+  
+body {  
+    background: #eef1ee;  
+    height: 100vh;  
+    display: flex;  
+    flex-direction: column;  
+}  
+  
+.content {  
+    width: 88%;  
+    max-width: 420px;  
+    margin: 0 auto;  
+    text-align: center;  
+    padding-top: 6%;  
+}  
+  
+.top {  
+    display: flex;  
+    justify-content: flex-end;  
+    font-size: 90%;  
+    margin-bottom: 4%;  
+}  
+  
+.icon-wrapper {  
+    width: 28%;  
+    aspect-ratio: 1/1;  
+    margin: 0 auto 5%;  
+    border-radius: 50%;  
+    border: 0.25em solid #f08c57;  
+    display: flex;  
+    justify-content: center;  
+    align-items: center;  
+    position: relative;  
+}  
+  
+.icon-wrapper::after {  
+    content: "";  
+    position: absolute;  
+    width: 70%;  
+    height: 70%;  
+    border-radius: 50%;  
+    border: 0.25em solid #f08c57;  
+}  
+  
+.phone {  
+    width: 30%;  
+    height: 48%;  
+    border: 0.15em solid #f08c57;  
+    border-radius: 20%;  
+    position: relative;  
+}  
+  
+.phone::after {  
+    content: "";  
+    position: absolute;  
+    bottom: 6%;  
+    left: 50%;  
+    transform: translateX(-50%);  
+    width: 35%;  
+    height: 6%;  
+    background: #f08c57;  
+    border-radius: 50%;  
+}  
+  
+.title {  
+    font-size: 155%;  
+    font-weight: bold;  
+    margin-bottom: 3%;  
+}  
+  
+.text {  
+    font-size: 95%;  
+    margin-bottom: 2%;  
+}  
+  
+.number {  
+    font-weight: bold;  
+}  
+  
+.code-wrapper {  
+    margin-top: auto;  
+    margin-bottom: 48vh;  
+    width: 88%;  
+    max-width: 420px;  
+    margin-left: auto;  
+    margin-right: auto;  
+}  
+  
+.code {  
+    display: flex;  
+    justify-content: space-between;  
+}  
+  
+.code input {  
+    width: 13%;  
+    aspect-ratio: 1/1.2;  
+    border-radius: 22%;  
+    border: none;  
+    background: #fff;  
+    text-align: center;  
+    font-size: 120%;  
+    outline: none;  
+}  
+  
+.bottom {  
+    position: fixed;  
+    bottom: 5%;  
+    left: 0;  
+    width: 100%;  
+    padding: 0 8%;  
+}  
+  
+.btn {  
+    width: 100%;  
+    padding: 4%;  
+    font-size: 100%;  
+    border: none;  
+    margin-bottom: 4%;  
+    border-radius: 10px;  
+}  
+  
+.confirm {  
+    background: #cfcfcf;  
+    color: #fff;  
+}  
+  
+.confirm.active {  
+    background: #000;  
+}  
+  
+.cancel {  
+    background: #fff;  
+    color: #000;  
+}  
+</style>  </head>  <body>  <div class="content">  
+    <div class="top">رجوع ›</div>  <div class="icon-wrapper">  
+    <div class="phone"></div>  
+</div>  
 
-<h2>تشغيل API عبر Python</h2>
+<div class="title">Confirmation de l'opération</div>  
+<div class="text">الرجاء إدخال الرمز الذي وصلك في رسالة قصيرة</div>  
+<div class="text">أدخل الرمز المكون من ستة أرقام الذي تلقيته على:</div>  
+<div class="number">38 28 44 34 222+</div>
 
-<button onclick="runAPI()">تشغيل</button>
-
-<pre id="output"></pre>
-
-<script>
-function runAPI() {
-    fetch("/run", { method: "POST" })
-    .then(res => res.json())
-    .then(data => {
-        document.getElementById("output").innerText =
-            JSON.stringify(data, null, 2);
-    });
-}
-</script>
-
-</body>
-</html>
+</div>  <div class="code-wrapper">  
+    <div class="code">  
+        <input type="text" maxlength="1">  
+        <input type="text" maxlength="1">  
+        <input type="text" maxlength="1">  
+        <input type="text" maxlength="1">  
+        <input type="text" maxlength="1">  
+        <input type="text" maxlength="1">  
+    </div>  
+</div>  <div class="bottom">  
+    <button class="btn confirm" disabled>Confirmer</button>  
+    <button class="btn cancel">Annuler</button>  
+</div>  <script>  
+const inputs = document.querySelectorAll(".code input");  
+const btn = document.querySelector(".confirm");  
+  
+let isTyping = false;  
+let isDeleting = false;  
+  
+/* تحقق */  
+function checkInputs() {  
+    const allFilled = [...inputs].every(i => i.value !== "");  
+  
+    if (allFilled) {  
+        btn.classList.add("active");  
+        btn.disabled = false;  
+    } else {  
+        btn.classList.remove("active");  
+        btn.disabled = true;  
+    }  
+}  
+  
+/* إدخال */  
+inputs.forEach((input, index) => {  
+  
+    input.addEventListener("input", () => {  
+        isTyping = true;  
+  
+        input.value = input.value.replace(/[^0-9]/g, '');  
+  
+        if (input.value && index < inputs.length - 1) {  
+            inputs[index + 1].focus();  
+        }  
+  
+        checkInputs();  
+  
+        setTimeout(() => isTyping = false, 100);  
+    });  
+  
+    input.addEventListener("keydown", (e) => {  
+        if (e.key === "Backspace") {  
+            isDeleting = true;  
+  
+            if (!input.value && index > 0) {  
+                inputs[index - 1].focus();  
+            }  
+        }  
+    });  
+  
+    input.addEventListener("keyup", () => {  
+        isDeleting = false;  
+    });  
+  
+});  
+  
+/* الضغط اليدوي */  
+inputs.forEach((input, index) => {  
+    input.addEventListener("focus", () => {  
+        if (!isTyping && !isDeleting && index !== 0) {  
+            inputs[0].focus();  
+        }  
+    });  
+});  
+  
+/* لصق */  
+inputs[0].addEventListener("paste", (e) => {  
+    const data = e.clipboardData.getData("text").replace(/[^0-9]/g, '');  
+  
+    if (data.length === inputs.length) {  
+        inputs.forEach((input, i) => {  
+            input.value = data[i];  
+        });  
+        checkInputs();  
+    }  
+  
+    e.preventDefault();  
+});  
+</script>  </body>  
+    </html>
