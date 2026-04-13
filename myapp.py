@@ -1,12 +1,16 @@
-from flask import Flask
-import os
+from flask import Flask, render_template, jsonify
+from api_script import get_api_data
 
 app = Flask(__name__)
 
 @app.route("/")
 def home():
-    return "موقعي شغال 🚀"
+    return render_template("index.html")
+
+@app.route("/run", methods=["POST"])
+def run():
+    result = get_api_data()
+    return jsonify(result)
 
 if __name__ == "__main__":
-    port = int(os.environ.get("PORT", 10000))
-    app.run(host="0.0.0.0", port=port)
+    app.run(debug=True)
