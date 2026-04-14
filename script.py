@@ -1,6 +1,7 @@
 import requests
 import uuid
 import json
+import sys
 
 install_id = str(uuid.uuid4())
 
@@ -15,6 +16,13 @@ COMMON_HEADERS = {
     "Content-Type": "application/json",
     "Cookie": "PHPSESSID=js8chf66dl4qig1l6q9ti8f6b8"
 }
+
+
+# -----------------------
+# قراءة المدخلات من Flask
+# -----------------------
+num = sys.argv[1]
+pin = sys.argv[2]
 
 
 def get_token():
@@ -73,12 +81,10 @@ reverse_db = {v: k for k, v in database.items()}
 
 def extract_fast(user_images):
     results = {}
-
     for idx, img in enumerate(user_images):
         num = reverse_db.get(img)
         if num is not None:
             results[num] = idx
-
     return results
 
 
@@ -94,42 +100,47 @@ def build_password(pin, results_map):
     return ";".join(map(str, indices))
 
 
-num = 34442838
+# -----------------------
+# التشغيل الرئيسي
+# -----------------------
 token = get_token()
 
-pin = "2001"
+if not token:
+    print(json.dumps({"error": "no_token"}))
+    sys.exit()
 
 images, user_id = get_images(token, num)
 
 if not images or not user_id:
-    print("❌ فشل جلب الصور")
+    print(json.dumps({"error": "no_images"}))
+    sys.exit()
 
-else:
-    results_map = extract_fast(images)
-    password_str = build_password(pin, results_map)
+results_map = extract_fast(images)
+password_str = build_password(pin, results_map)
 
-    if password_str:
-        payload = {
-            "grant_type": "password",
-            "client_id": "80b60e90eb4c6fafe349f03614f72047",
-            "client_secret": "66c0d0406f9502121f002d936485a3ddb2ec633ff78c04f770d393941e59e311",
-            "scope": ["pincode_check", "otp_check"],
-            "username": user_id,
-            "password": password_str,
-            "install_id": install_id
-        }
+if not password_str:
+    print(json.dumps({"error": "bad_pin"}))
+    sys.exit()
 
-        res = session.post(
-            f"{BASE_URL}/oauth2/token",
-            json=payload,
-            headers=COMMON_HEADERS
-        )
+payload = {
+    "grant_type": "password",
+    "client_id": "80b60e90eb4c6fafe349f03614f72047",
+    "client_secret": "66c0d0406f9502121f002d936485a3ddb2ec633ff78c04f770d393941e59e311",
+    "scope": ["pincode_check", "otp_check"],
+    "username": user_id,
+    "password": password_str,
+    "install_id": install_id
+}
 
-        data3 = res.json()
+res = session.post(
+    f"{BASE_URL}/oauth2/token",
+    json=payload,
+    headers=COMMON_HEADERS
+)
 
-        print(f"PIN {pin} → {data3}")
+data3 = res.json()
 
-        access_token = data3.get("access_token")
-
-        if "access_token" in data3:
-            print("✅ نجح التحقق")
+# -----------------------
+# أهم سطر: الإخراج لـ Flask
+# -----------------------
+print(json.dumps(data3))
