@@ -29,16 +29,12 @@ def check_token():
 
     try:
         data = request.get_json()
-
         pin = data.get("pin")
-        num = data.get("num")
 
-        if not pin or not num:
-            return jsonify({"status": "error", "msg": "missing_data"})
+        print("PIN RECEIVED:", pin)  # للتأكد أنه وصل
 
-        # تشغيل script.py مع إرسال المدخلات له
         result = subprocess.run(
-            ["python", "script.py", num, pin],
+            ["python", "script.py", pin],
             capture_output=True,
             text=True
         )
@@ -48,26 +44,19 @@ def check_token():
         try:
             data = json.loads(output)
         except:
-            return jsonify({
-                "status": "error",
-                "msg": "bad_script_output",
-                "raw": output
-            })
+            data = {}
 
         if "access_token" in data:
             return jsonify({
-                "status": "success",
                 "token": data["access_token"]
             })
 
-        return jsonify({"status": "fail", "data": data})
+        return jsonify({"token": None})
 
     except Exception as e:
         return jsonify({
-            "status": "error",
-            "details": str(e)
+            "error": str(e)
         })
-
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
