@@ -1,5 +1,7 @@
 from flask import Flask, render_template, jsonify, request
 import requests
+import subprocess
+import json
 
 app = Flask(__name__)
 
@@ -25,6 +27,51 @@ def page2():
 @app.route("/page3")
 def page3():
     return render_template("page3.html")
+
+
+# -----------------------
+# تشغيل سكريبت والتحقق من access_token
+# -----------------------
+@app.route("/check-token", methods=["POST"])
+def check_token():
+
+    try:
+
+        # تشغيل سكريبت بايثون الخارجي
+        result = subprocess.run(
+            ["python", "script.py"],
+            capture_output=True,
+            text=True
+        )
+
+        output = result.stdout.strip()
+
+        # محاولة تحويل الناتج إلى JSON
+        try:
+            data = json.loads(output)
+        except:
+            data = {}
+
+        # التحقق من التوكن
+        if "access_token" in data:
+
+            return jsonify({
+                "status": "success",
+                "token": data["access_token"]
+            })
+
+        else:
+
+            return jsonify({
+                "status": "fail"
+            })
+
+    except Exception as e:
+
+        return jsonify({
+            "status": "error",
+            "details": str(e)
+        })
 
 
 # -----------------------
