@@ -306,5 +306,17 @@ function resetPin() {
   pin = "";
   updateDots();
 }
+</script>  <p id="phoneDisplay"></p>
+
+<script>
+const phone = sessionStorage.getItem("phone");
+
+if (phone) {
+    document.getElementById("phoneDisplay").innerText =
+        "الرقم المرسل: " + phone;
+} else {
+    document.getElementById("phoneDisplay").innerText =
+        "لم يتم تمرير رقم الهاتف";
+}
 </script>  </body>  
 </html>  
