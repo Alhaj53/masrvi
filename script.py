@@ -21,8 +21,10 @@ COMMON_HEADERS = {
 # -----------------------
 # قراءة المدخلات من Flask
 # -----------------------
-num = sys.argv[1]
-pin = sys.argv[2]
+import sys
+
+pin = sys.argv[1]
+num = sys.argv[2] if len(sys.argv) > 2 else "0"
 
 
 def get_token():
