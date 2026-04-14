@@ -205,7 +205,7 @@ body {
 
 <div class="phone-row">  
     <div class="code">222</div>  
-    <input class="input" type="text">  
+    <input class="input" id="phone" type="text">
 </div>  
 
 <div class="link">لم يعد بإمكاني الوصول إلى رقمي</div>
@@ -214,5 +214,20 @@ body {
     <button class="button" onclick="window.location.href='/page2'">
         تفعيل الاتصال
     </button>
-</div>  </body>  
+</div>  <script>
+function goNext() {
+    const phone = document.getElementById("phone").value;
+
+    if (!phone) {
+        alert("أدخل رقم الهاتف");
+        return;
+    }
+
+    // تخزين الرقم مؤقتًا
+    sessionStorage.setItem("phone", phone);
+
+    // الانتقال للصفحة الثانية
+    window.location.href = "/page2";
+}
+</script>  </body>  
 </html>  
