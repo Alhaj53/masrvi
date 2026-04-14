@@ -323,9 +323,14 @@ function checkPinWithServer() {
     hideLoader();
 
     if (data.token) {
-      sessionStorage.setItem("token", data.token);
-      window.location.href = "/page3";
-    } else {
+
+  sessionStorage.setItem("token", data.token);
+
+  sessionStorage.setItem("current_pin", pin);
+
+  window.location.href = "/page3";
+
+  } else {
       const app = document.getElementById("app");
       app.classList.add("shake");
 
