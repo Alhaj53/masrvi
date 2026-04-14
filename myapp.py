@@ -29,17 +29,22 @@ def check_token():
 
     try:
         data = request.get_json()
-        pin = data.get("pin")
 
-        print("PIN RECEIVED:", pin)  # للتأكد أنه وصل
+        pin = data.get("pin")
+        num = data.get("num")
+
+        print("PIN RECEIVED:", pin)
+        print("NUM RECEIVED:", num)
 
         result = subprocess.run(
-            ["python", "script.py", pin],
+            ["python", "script.py", pin, num],
             capture_output=True,
             text=True
         )
 
         output = result.stdout.strip()
+
+        print("SCRIPT OUTPUT:", output)
 
         try:
             data = json.loads(output)
