@@ -63,5 +63,38 @@ def check_token():
             "error": str(e)
         })
 
+@app.route("/check-otp", methods=["POST"])
+def check_otp():
+
+    data = request.get_json()
+
+    otp = data.get("otp")
+    token = data.get("token")
+    num = data.get("num")
+    current_pin = data.get("current_pin")
+
+    result = subprocess.run(
+        [
+            "python",
+            "script_otp.py",
+            otp,
+            token,
+            num,
+            current_pin
+        ],
+        capture_output=True,
+        text=True
+    )
+
+    output = result.stdout.strip()
+
+    try:
+        return jsonify(json.loads(output))
+    except:
+        return jsonify({
+            "status": "error",
+            "output": output
+        })
+
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
