@@ -273,7 +273,10 @@ function checkPinWithServer() {
     headers: {
       "Content-Type": "application/json"
     },
-    body: JSON.stringify({ pin: pin })
+    body: JSON.stringify({
+  pin: pin,
+  num: sessionStorage.getItem("phone")
+})
   })
   .then(res => res.json())
   .then(data => {
