@@ -35,7 +35,7 @@ url3 = "https://22201.tagpay.fr/api/client/v1/oauth2/otp"
 
 payload3 = {
     "grant_type": "password",
-    "client_id": "80b60e90eb4c6fafe349f03614f72047,
+    "client_id": "80b60e90eb4c6fafe349f03614f72047",
     "client_secret": "66c0d0406f9502121f002d936485a3ddb2ec633ff78c04f770d393941e59e311",
     "scope": [],
     "username": access_token,
