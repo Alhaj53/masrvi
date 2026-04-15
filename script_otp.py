@@ -16,7 +16,7 @@ current_password = sys.argv[4]
 # إعداد session
 # -----------------------
 
-install_id = "f6a901b1-ec16-4ae7-9511-756c7f30b82e"
+install_id = str(uuid.uuid4())
 session = requests.Session()
 
 BASE_URL = "https://22201.tagpay.fr/api/client/v1"
