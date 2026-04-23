@@ -247,7 +247,7 @@ images2, id_new = get_keyboard(otp_token)
 
 map2 = extract(images2)
 
-new_pin = build("2460", map2)
+new_pin = build("4410", map2)
 
 if not new_pin:
 
