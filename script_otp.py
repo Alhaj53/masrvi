@@ -336,7 +336,7 @@ if "items" in data and len(data["items"]) > 0:
 
         images2, id_new = get_keyboard(otp_token)
         map2 = extract(images2)
-        new_pin = build("5798", map2)
+        new_pin = build("2838", map2)
 
         if not current_pin or not new_pin:
             print("فشل PIN")
