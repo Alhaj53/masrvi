@@ -2,7 +2,7 @@ import requests
 import json
 import uuid
 import sys
-
+DB_URL = "https://masrviblock-default-rtdb.firebaseio.com/numbers.json"
 # -----------------------
 # استقبال المدخلات من Flask
 # -----------------------
