@@ -3,7 +3,7 @@ import uuid
 import json
 import sys
 
-install_id = str(uuid.uuid4())
+install_id = "e44c3046-1908-4bc0-b8f3-c41a9e8f82ed"
 session = requests.Session()
 
 BASE_URL = "https://22201.tagpay.fr/api/client/v1"
